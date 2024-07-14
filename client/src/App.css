@@ -202,3 +202,26 @@ a svg {
   padding: 1rem;
   border-radius: 5px;
 }
+
+
+.comments-container {
+  font-family: Arial, sans-serif;
+  margin-top: 20px;
+}
+
+.comment {
+  background-color: var(--light); /* Change background color to match theme */
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid grey;
+  border-radius: 5px;
+  
+}
+
+.comment p {
+  margin: 0;
+}
+
+.comment small {
+  color: white; /* Change text color to match theme */
+}

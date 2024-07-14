@@ -2,6 +2,8 @@ import { formatISO9075 } from "date-fns";
 import { useContext, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { UserContext } from "../userContext";
+import Comments from "./Comments";
+import CommentForm from "./CommentForm";
 
 export default function PostPage() {
   const [postInfo, setPostInfo] = useState(null);
@@ -52,6 +54,8 @@ export default function PostPage() {
         className="content"
         dangerouslySetInnerHTML={{ __html: postInfo.content }}
       />
+      {/* <CommentForm postId={id}/> */}
+      <Comments postId={id} />
     </div>
   );
 }

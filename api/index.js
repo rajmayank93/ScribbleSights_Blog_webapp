@@ -12,6 +12,7 @@ const uploadMiddleware = multer({ dest: "uploads/" });
 const fs = require("fs");
 const dotenv = require("dotenv");
 dotenv.config();
+const Comment=require("./models/Comment");
 // console.log(process.env) // remove this after you've confirmed it is working
 const DATABASE_URL = process.env.DATABASE_URL;
 
@@ -56,7 +57,11 @@ app.post("/register", async (req, res) => {
 
 app.post("/login", async (req, res) => {
   const { username, password } = req.body;
-  const userDoc = await User.findOne({ username });
+  try{
+    const userDoc = await User.findOne({ username });
+  if(!userDoc){
+    return res.status(400).json("user not found");
+  }
   const passOk = bcrypt.compareSync(password, userDoc.password);
   if (passOk) {
     // logged in
@@ -68,10 +73,14 @@ app.post("/login", async (req, res) => {
         username,
       });
     });
+
   } else {
     res.status(400).json("wrong credientails");
   }
-
+  }catch(e){
+    console.log(e);
+    res.status(400).json("wrong credientails");
+  }
   //   res.json(passOk);
 });
 
@@ -161,6 +170,40 @@ app.get("/post/:id", async (req, res) => {
   const { id } = req.params;
   const postDoc = await Post.findById(id).populate("author", "username");
   res.json(postDoc);
+});
+
+app.post("/comment", async (req, res) => {
+  const { token } = req.cookies;
+  jwt.verify(token, secret, {}, async (err, info) => {
+    if (err) throw err;
+    const { postId, content } = req.body;
+    try {
+      // console.log("test");
+      const commentDoc = await Comment.create({
+        content,
+        author: info.id,
+        post: postId,
+      });
+      console.log(commentDoc);
+      await Post.findByIdAndUpdate(postId, {
+        $push: { comments: commentDoc._id },
+      });
+      res.json(commentDoc);
+    } catch (e) {
+      res.status(400).json(e);
+    }
+  });
+});
+
+// Fetch comments for a post
+app.get("/comments/:postId", async (req, res) => {
+  const { postId } = req.params;
+  try {
+    const comments = await Comment.find({ post: postId }).populate("author", "username");
+    res.json(comments);
+  } catch (e) {
+    res.status(400).json(e);
+  }
 });
 
 app.listen(process.env.PORT);
